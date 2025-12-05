@@ -1,12 +1,12 @@
 # uk_bus_stop_display
-A basic tool to show the distance of relevant busses from a given UK bus stop. Uses the Bus Open Data Service (BODS) and displays on a SSD1322 OLED.
+A basic tool to show the distance of relevant buses from a given UK bus stop. Uses the Bus Open Data Service (BODS) and displays on a SSD1322 OLED.
 ![alt text](https://github.com/canonicalname/uk_bus_stop_display/blob/main/display.png "Poor quality photo of the display in action")
 
 # Things you will likely need
 - A Raspberry Pi, I used an old Pi Zero W
 - An SD1322 OLED screen, I got this one from Amazon https://amzn.eu/d/czxcd94
 - An API key from https://data.bus-data.dft.gov.uk/, this should be added to the API_KEY in bus_stop.py
-- Also in bus_stop.py, details of busses that you want to track, specifically:
+- Also in bus_stop.py, details of buses that you want to track, specifically:
 -- The line reference, for example this is '1': https://bustimes.org/services/1-gillingham-university-of-medway-dockside-outlet
 -- The route origin location code which you can find from the the route details, e.g. 'Gillingham The Strand' is 249000000619 from the URL https://bustimes.org/stops/249000000619
 -- The route destination location code which can be found in a similar way
