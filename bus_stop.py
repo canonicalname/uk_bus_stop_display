@@ -11,7 +11,7 @@ from typing import Optional, List, Dict
 from dataclasses import dataclass
 import time
 import random
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from luma.core.interface.serial import spi
 from luma.oled.device import ssd1322
 from luma.core.render import canvas
@@ -171,6 +171,12 @@ def is_in_filtered_direction(bus_location: Location, stop_location: Location, fi
     
     filter_dir = filter_direction.upper()
     
+    # Define broader ranges for each cardinal direction
+    # N: 315° to 45° (includes NW, N, NE)
+    # E: 45° to 135° (includes NE, E, SE)
+    # S: 135° to 225° (includes SE, S, SW)
+    # W: 225° to 315° (includes SW, W, NW)
+    
     if filter_dir == "N":
         return bearing >= 270 or bearing < 90
     elif filter_dir == "E":
@@ -183,6 +189,56 @@ def is_in_filtered_direction(bus_location: Location, stop_location: Location, fi
         # If it's a diagonal direction (NE, SE, SW, NW), use narrower range
         direction = get_cardinal_direction(bearing)
         return direction == filter_dir
+
+
+def is_bus_data_fresh(recorded_at: str, max_age_minutes: int = 15) -> bool:
+    """
+    Check if bus data is fresh (not older than max_age_minutes)
+    
+    Args:
+        recorded_at: ISO 8601 timestamp string (e.g., "2025-12-05T09:46:52+00:00")
+        max_age_minutes: Maximum age in minutes (default 15)
+    
+    Returns:
+        True if data is fresh, False if stale or invalid
+    """
+    if not recorded_at:
+        return False
+    
+    try:
+        # Parse the ISO 8601 timestamp
+        recorded_time = datetime.fromisoformat(recorded_at.replace('Z', '+00:00'))
+        
+        # Get current time in UTC
+        current_time = datetime.now(timezone.utc)
+        
+        # Calculate age
+        age = current_time - recorded_time
+        
+        # Check if within acceptable age
+        return age <= timedelta(minutes=max_age_minutes)
+    except (ValueError, AttributeError) as e:
+        print(f"Error parsing timestamp '{recorded_at}': {e}")
+        return False
+
+
+def filter_buses_by_freshness(buses: List[Bus], max_age_minutes: int = 15) -> List[Bus]:
+    """
+    Filter out buses with stale data (older than max_age_minutes)
+    
+    Args:
+        buses: List of Bus objects
+        max_age_minutes: Maximum age in minutes (default 15)
+    
+    Returns:
+        Filtered list of Bus objects with fresh data
+    """
+    filtered = []
+    for bus in buses:
+        if is_bus_data_fresh(bus.recorded_at, max_age_minutes):
+            filtered.append(bus)
+    
+    return filtered
 
 
 def filter_buses_by_direction(buses: List[Bus], stop: BusStop, filter_direction: str) -> List[Bus]:
@@ -382,11 +438,15 @@ def test_with_sample_file():
         
         buses = parse_buses_from_xml(xml_data)
         
+        # Apply freshness filter
+        fresh_buses = filter_buses_by_freshness(buses, max_age_minutes=15)
+        
         # Apply cardinal direction filter
-        filtered_buses = filter_buses_by_direction(buses, stop, CARDINAL_FILTER)
+        filtered_buses = filter_buses_by_direction(fresh_buses, stop, CARDINAL_FILTER)
         
         print(f"\nTotal buses: {len(buses)}")
-        print(f"After filtering: {len(filtered_buses)}")
+        print(f"Fresh buses (< 15 min old): {len(fresh_buses)}")
+        print(f"After direction filtering: {len(filtered_buses)}")
         
         display_bus_distances(filtered_buses, stop)
         
@@ -617,8 +677,11 @@ def run_display_loop():
             # Fetch bus data
             buses = fetch_all_buses(BUS_ROUTES, verbose=False)
             
+            # Apply freshness filter (remove buses with stale data)
+            fresh_buses = filter_buses_by_freshness(buses, max_age_minutes=15)
+            
             # Apply direction filter
-            filtered_buses = filter_buses_by_direction(buses, stop, CARDINAL_FILTER)
+            filtered_buses = filter_buses_by_direction(fresh_buses, stop, CARDINAL_FILTER)
             
             # Sort by distance
             buses_with_distance = []
@@ -634,7 +697,14 @@ def run_display_loop():
             display_buses_on_oled(device, sorted_buses, stop)
             
             # Print summary to console
-            print(f"[{datetime.now().strftime('%H:%M:%S')}] Buses: {len(buses)} total, {len(filtered_buses)} after filter, showing top {min(len(sorted_buses), 3)}")
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] Buses: {len(buses)} total, {len(fresh_buses)} fresh, {len(filtered_buses)} after direction filter, showing top {min(len(sorted_buses), 3)}")
+            
+            # List vehicle_ref for each tracked bus
+            if sorted_buses:
+                print("  Tracked buses:")
+                for i, bus in enumerate(sorted_buses[:3], 1):
+                    distance_km = stop.distance_from_bus(bus) / 1000.0
+                    print(f"    {i}. Line {bus.line_ref} - Vehicle {bus.vehicle_ref} - {distance_km:.1f}km away")
             
             # Wait with jitter (10 ± 2 seconds)
             jitter = random.uniform(-2, 2)
@@ -665,11 +735,15 @@ def main():
         print("No buses found")
         return
     
+    # Apply freshness filter
+    fresh_buses = filter_buses_by_freshness(buses, max_age_minutes=15)
+    
     # Apply cardinal direction filter
-    filtered_buses = filter_buses_by_direction(buses, stop, CARDINAL_FILTER)
+    filtered_buses = filter_buses_by_direction(fresh_buses, stop, CARDINAL_FILTER)
     
     print(f"\nTotal buses: {len(buses)}")
-    print(f"After filtering: {len(filtered_buses)}")
+    print(f"Fresh buses (< 15 min old): {len(fresh_buses)}")
+    print(f"After direction filtering: {len(filtered_buses)}")
     
     # Display bus locations and distances
     display_bus_distances(filtered_buses, stop)
