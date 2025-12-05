@@ -54,24 +54,6 @@ A basic tool to show the distance of relevant busses from a given UK bus stop. U
 - Display Pin 15 (RES#) → Raspberry Pi Pin 22 (GPIO 25)
 - Display Pin 16 (CS#) → Raspberry Pi Pin 24 (GPIO 8 CE0)
 
-## Raspberry Pi GPIO Header Reference
-
-```
-     3.3V  [ 1] [ 2]  5V
-    GPIO2  [ 3] [ 4]  5V
-    GPIO3  [ 5] [ 6]  GND        ← VSS (Display Pin 1)
-    GPIO4  [ 7] [ 8]  GPIO14
-      GND  [ 9] [10]  GPIO15
-   GPIO17  [11] [12]  GPIO18
-   GPIO27  [13] [14]  GND
-   GPIO22  [15] [16]  GPIO23
-     3.3V  [17] [18]  GPIO24     ← D/C# (Display Pin 14)
-   GPIO10  [19] [20]  GND        ← MOSI/DIN (Display Pin 5)
-    GPIO9  [21] [22]  GPIO25     ← RES# (Display Pin 15)
-   GPIO11  [23] [24]  GPIO8      ← SCLK (Pin 4) & CE0 (Pin 16)
-      GND  [25] [26]  GPIO7
-```
-
 ## Verification of the display
 
 After wiring, verify SPI is enabled:
