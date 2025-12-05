@@ -413,7 +413,7 @@ sudo systemctl status bus-display.service
 
 ## Alternative: Systemd Timers
 
-If you prefer systemd timers over cron, you can create `.timer` files. Let me know if you'd like instructions for that approach.
+If you prefer systemd timers over cron, you can create `.timer` files.
 
 ## Logging
 
