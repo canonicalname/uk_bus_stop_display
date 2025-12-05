@@ -14,8 +14,9 @@ touch "$LOG_FILE" 2>/dev/null || true
 chmod 666 "$LOG_FILE" 2>/dev/null || true
 
 # Function to log messages
+# Note: systemd service redirects stdout/stderr to log file, so we only echo once
 log_message() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE" 2>/dev/null || echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
 }
 
 log_message "Starting Bus Stop Display..."
@@ -40,7 +41,8 @@ fi
 
 # Run the bus stop display
 log_message "Starting bus_stop.py..."
-python3 "$SCRIPT_DIR/bus_stop.py" >> "$LOG_FILE" 2>&1
+#python3 "$SCRIPT_DIR/bus_stop.py" >> "$LOG_FILE" 2>&1 # Verbose logging
+python3 "$SCRIPT_DIR/bus_stop.py"
 
 # If the script exits, log it
 log_message "Bus Stop Display stopped"
