@@ -1,0 +1,18 @@
+[Unit]
+Description=Bus Stop OLED Display
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/bus_stop
+ExecStart=/home/pi/bus_stop/start_bus_display.sh
+ExecStopPost=/home/pi/bus_stop/.venv/bin/python3 /home/pi/bus_stop/clear_display.py
+Restart=always
+RestartSec=10
+StandardOutput=append:/home/pi/bus_stop/bus_display.log
+StandardError=append:/home/pi/bus_stop/bus_display.log
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,5 @@
+luma.oled>=3.12.0
+pillow>=9.0.0
+RPi.GPIO>=0.7.1
+spidev>=3.5
+requests>=2.31.0
