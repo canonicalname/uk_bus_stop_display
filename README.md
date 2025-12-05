@@ -88,8 +88,6 @@ If not you can configure with:
    # Reboot when prompted
    ```
 
-You can then try to test the screen with the ssd1322_advanced.py tool provided.
-
 # Bus Stop Display - Installation Instructions
 
 ## Prerequisites
@@ -135,18 +133,19 @@ This will install:
 
 ### 3. Test the display manually
 
-Use 
 ```bash
 # Still in the virtual environment
 sudo $(which python3) ssd1322_advanced.py
 ```
-or
+If everything works, you should see a variety of output on the screen.
+
+If you have your API keys, buses and bus stop configured you can try the app with:
+
 ```bash
 # Still in the virtual environment
 sudo $(which python3) bus_stop.py --once
 ```
-
-If everything works, you should see bus data fetched and displayed in the console.
+If this works, you should see bus data fetched and displayed in the console.
 
 ## Setup for Auto-Start on Boot
 
