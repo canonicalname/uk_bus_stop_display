@@ -172,10 +172,10 @@ def is_in_filtered_direction(bus_location: Location, stop_location: Location, fi
     filter_dir = filter_direction.upper()
     
     # Define broader ranges for each cardinal direction
-    # N: 315° to 45° (includes NW, N, NE)
-    # E: 45° to 135° (includes NE, E, SE)
-    # S: 135° to 225° (includes SE, S, SW)
-    # W: 225° to 315° (includes SW, W, NW)
+    # N: 270° to 90° (includes NW, N, NE)
+    # E: 0° to 180° (includes NE, E, SE)
+    # S: 90° to 270° (includes SE, S, SW)
+    # W: 180° to 359° (includes SW, W, NW)
     
     if filter_dir == "N":
         return bearing >= 270 or bearing < 90
