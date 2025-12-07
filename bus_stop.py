@@ -661,6 +661,9 @@ def run_display_loop():
     print("Initializing OLED display...")
     serial = spi(device=0, port=0)
     device = ssd1322(serial, width=256, height=64)
+
+    # Set contrast (0-255, default is ~127)
+    device.contrast(32)  # Adjust this value to your preference, lower settings may reduce burn-in?
     
     # Create bus stop
     stop = BusStop(
